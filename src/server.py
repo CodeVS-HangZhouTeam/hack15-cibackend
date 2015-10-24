@@ -42,6 +42,9 @@ class PullRequestHandler(tornado.web.RequestHandler):
             if clone_ret:
                 return (yield self.report({'user': user, 'error': 'Unable to download source code'}))
 
+
+            logging.info('Clone ok')
+
             repo_dir = os.path.join(clone_dest, 'repo')
             build_command = ['/usr/bin/make', 'all']
             build_process = tornado.process.Subprocess(build_command, cwd=repo_dir, stdin=subprocess.DEVNULL)
@@ -49,16 +52,22 @@ class PullRequestHandler(tornado.web.RequestHandler):
             if build_ret:
                 return (yield self.report({'user': user, 'error': 'Build error'}))
 
+            logging.info('Build ok')
+
             input_file = os.path.join(repo_dir, 'stdin.txt')
             run_command = ['/usr/bin/make', 'run']
             with open(input_file, 'rb') as fin:
                 run_process = tornado.process.Subprocess(run_command, cwd=repo_dir, stdin=fin, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            logging.info('Run started')
             run_ret = yield run_process.wait_for_exit()
+            logging.info('Run finished')
             run_stdout, run_stderr = run_process.stdout.read().decode('utf-8', 'replace'), run_process.stderr.read().decode('utf-8', 'replace')
+            logging.info('Run read')
             if run_ret:
                 return (yield self.report({'user': user, 'error': 'Program exited abnormally', 'stdout': run_stdout, 'stderr': run_stderr}))
             else:
                 return (yield self.report({'user': user, 'error': None, 'stdout': run_stdout, 'stderr': run_stderr}))
+            logging.info('Run ok')
         finally:
             shutil.rmtree(clone_dest, True)
 
