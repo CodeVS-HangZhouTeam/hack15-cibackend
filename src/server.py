@@ -63,16 +63,20 @@ class PullRequestHandler(tornado.web.RequestHandler):
             logging.info('Build OK')
 
             input_file = os.path.join(repo_dir, 'stdin.txt')
+            output_file = os.path.join(repo_dir, 'stdout.txt')
             run_command = ['/usr/bin/make', 'run']
             with open(input_file, 'rb') as fin:
                 run_process = tornado.process.Subprocess(run_command, cwd=repo_dir, stdin=fin, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             run_ret = yield run_process.wait_for_exit()
-            run_stdout, run_stderr = run_process.stdout.read().decode('utf-8', 'replace'), run_process.stderr.read().decode('utf-8', 'replace')
+            run_stdout = run_process.stdout.read()
+            run_stderr = run_process.stderr.read()
             logging.info('Run OK')
             if run_ret:
                 return (yield self.report({'user': user, 'error': 'Program exited abnormally', 'stdout': run_stdout, 'stderr': run_stderr}))
             else:
-                return (yield self.report({'user': user, 'error': None, 'stdout': run_stdout, 'stderr': run_stderr}))
+                with open(output_file, 'wb') as fout:
+                    result_corrct = run_stdout == fout.read() 
+                return (yield self.report({'user': user, 'error': None if result_correct else 'Wrong answer', 'stdout': run_stdout.decode('utf-8', 'replace'), 'stderr': run_stderr.decode('utf-8', 'replace')}))
         finally:
             shutil.rmtree(clone_dest, True)
 
@@ -80,7 +84,7 @@ class PullRequestHandler(tornado.web.RequestHandler):
     def report(self, payload):
         sys.stderr.write(json.dumps(payload))
         sys.stderr.write('\n')
-        self.application.db.con.execute('INSERT INTO TABLE records (user, iserror, error, stdout, stderr) VALUES (?, ?, ?, ?, ?, ?);', (payload['user'], payload['error'] is not None, payload['error'] or '', payload['stdout'], payload['stderr']))
+        self.application.db.con.execute('INSERT INTO records (user, iserror, error, stdout, stderr) VALUES (?, ?, ?, ?, ?, ?);', (GITHUB_USER_MAP.get(payload['user'], payload['user']), payload['error'] is not None, payload['error'] or '', payload['stdout'], payload['stderr']))
 
 
 class DBMan:
