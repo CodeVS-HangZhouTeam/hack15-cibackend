@@ -52,7 +52,7 @@ class PullRequestHandler(tornado.web.RequestHandler):
             input_file = os.path.join(repo_dir, 'stdin.txt')
             run_command = ['/usr/bin/make', 'run']
             with open(input_file, 'rb') as fin:
-                run_process = tornado.process.Subprocess(run_command, cwd=repo_dir, stdin=fin, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=5)
+                run_process = tornado.process.Subprocess(run_command, cwd=repo_dir, stdin=fin, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             run_ret = yield run_process.wait_for_exit()
             run_stdout, run_stderr = run_process.stdout.communicate()
             run_stdout, run_stderr = run_stdout.read().decode('utf-8', 'replace'), run_stderr.read().decode('utf-8', 'replace')
