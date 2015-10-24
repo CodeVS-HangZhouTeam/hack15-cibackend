@@ -86,7 +86,7 @@ class PullRequestHandler(tornado.web.RequestHandler):
 
     @tornado.gen.coroutine
     def report(self, payload):
-        sys.stderr.write(json.dumps(payload))
+        sys.stderr.write(repr(payload))
         sys.stderr.write('\n')
         self.application.db.con.execute('INSERT INTO records (user, iserror, error, stdout, stderr) VALUES (?, ?, ?, ?, ?);', (GITHUB_USER_MAP.get(payload['user'], payload['user']), payload['error'] is not None, payload['error'] or '', payload['stdout'].decode('utf-8', 'replace'), payload['stderr'].decode('utf-8', 'replace')))
 
