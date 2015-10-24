@@ -17,7 +17,7 @@ import tornado.web
 
 GITHUB_USER_MAP = {
     "m13253": "Star Brilliant",
-    "jamesits": "James Swineson",
+    "Jamesits": "James Swineson",
     "luvletter": "Luv Letter"
 }
 
