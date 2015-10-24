@@ -54,7 +54,7 @@ class PullRequestHandler(tornado.web.RequestHandler):
             with open(input_file, 'rb') as fin:
                 run_process = tornado.process.Subprocess(run_command, cwd=repo_dir, stdin=fin, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             run_ret = yield run_process.wait_for_exit()
-            run_stdout, run_stderr = run_process.stdout.communicate()
+            run_stdout, run_stderr = run_process.communicate()
             run_stdout, run_stderr = run_stdout.read().decode('utf-8', 'replace'), run_stderr.read().decode('utf-8', 'replace')
             if run_ret:
                 return (yield self.report({'user': user, 'error': 'Program exited abnormally', 'stdout': run_stdout, 'stderr': run_stderr}))
