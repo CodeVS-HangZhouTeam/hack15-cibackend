@@ -57,6 +57,8 @@ class PullRequestHandler(tornado.web.RequestHandler):
             run_stdout, run_stderr = run_process.stdout.read().decode('utf-8', 'replace'), run_process.stderr.read().decode('utf-8', 'replace')
             if run_ret:
                 return (yield self.report({'user': user, 'error': 'Program exited abnormally', 'stdout': run_stdout, 'stderr': run_stderr}))
+            else:
+                return (yield self.report({'user': user, 'error': None, 'stdout': run_stdout, 'stderr': run_stderr}))
         finally:
             shutil.rmtree(clone_dest, True)
 
