@@ -61,7 +61,7 @@ class PullRequestHandler(tornado.web.RequestHandler):
             shutil.rmtree(clone_dest, True)
 
     @tornado.gen.coroutine
-    def report(payload):
+    def report(self, payload):
         sys.stderr.write(json.dumps(payload))
 
 
