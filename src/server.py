@@ -74,7 +74,7 @@ class PullRequestHandler(tornado.web.RequestHandler):
             if run_ret:
                 return (yield self.report({'user': user, 'error': 'Program exited abnormally', 'stdout': run_stdout, 'stderr': run_stderr}))
             else:
-                with open(output_file, 'wb') as fout:
+                with open(output_file, 'rb') as fout:
                     result_corrct = run_stdout == fout.read() 
                 return (yield self.report({'user': user, 'error': None if result_correct else 'Wrong answer', 'stdout': run_stdout.decode('utf-8', 'replace'), 'stderr': run_stderr.decode('utf-8', 'replace')}))
         finally:
