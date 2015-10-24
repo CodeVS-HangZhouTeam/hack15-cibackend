@@ -49,7 +49,9 @@ class PullRequestHandler(tornado.web.RequestHandler):
                 clone_ret = yield clone_process.wait_for_exit()
                 clone_count -= 1
             if clone_ret:
-                return (yield self.report({'user': user, 'error': 'Unable to download source code'}))
+                clone_stdout = clone_process.stdout.read()
+                clone_stderr = clone_process.stderr.read()
+                return (yield self.report({'user': user, 'error': 'Unable to download source code', 'stdout': clone_stdout, 'stderr': clone_stderr}))
 
             logging.info('Clone OK')
 
@@ -58,7 +60,9 @@ class PullRequestHandler(tornado.web.RequestHandler):
             build_process = tornado.process.Subprocess(build_command, cwd=repo_dir, stdin=subprocess.DEVNULL)
             build_ret = yield build_process.wait_for_exit()
             if build_ret:
-                return (yield self.report({'user': user, 'error': 'Build error'}))
+                build_stdout = build_process.stdout.read()
+                build_stderr = build_process.stderr.read()
+                return (yield self.report({'user': user, 'error': 'Build error', 'stdout': build_stdout, 'stderr': build_stderr}))
 
             logging.info('Build OK')
 
@@ -76,7 +80,7 @@ class PullRequestHandler(tornado.web.RequestHandler):
             else:
                 with open(output_file, 'rb') as fout:
                     result_correct = run_stdout == fout.read() 
-                return (yield self.report({'user': user, 'error': None if result_correct else 'Wrong answer', 'stdout': run_stdout.decode('utf-8', 'replace'), 'stderr': run_stderr.decode('utf-8', 'replace')}))
+                return (yield self.report({'user': user, 'error': None if result_correct else 'Wrong answer', 'stdout': run_stdout, 'stderr': run_stderr}))
         finally:
             shutil.rmtree(clone_dest, True)
 
@@ -84,7 +88,7 @@ class PullRequestHandler(tornado.web.RequestHandler):
     def report(self, payload):
         sys.stderr.write(json.dumps(payload))
         sys.stderr.write('\n')
-        self.application.db.con.execute('INSERT INTO records (user, iserror, error, stdout, stderr) VALUES (?, ?, ?, ?, ?);', (GITHUB_USER_MAP.get(payload['user'], payload['user']), payload['error'] is not None, payload['error'] or '', payload['stdout'], payload['stderr']))
+        self.application.db.con.execute('INSERT INTO records (user, iserror, error, stdout, stderr) VALUES (?, ?, ?, ?, ?);', (GITHUB_USER_MAP.get(payload['user'], payload['user']), payload['error'] is not None, payload['error'] or '', payload['stdout'].decode('utf-8', 'replace'), payload['stderr'].decode('utf-8', 'replace')))
 
 
 class DBMan:
