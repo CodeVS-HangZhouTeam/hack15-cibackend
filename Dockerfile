@@ -6,6 +6,8 @@ RUN sed -i 's/archive\.ubuntu\.com/mirrors.ustc.edu.cn/g' /etc/apt/sources.list 
     apt-get -y install --no-install-recommends gcc-5 g++-5 git make && \
     apt-get -y clean && \
     rm -rf /var/lib/apt/lists/* && \
+    ln -sf /usr/bin/gcc-5 /usr/local/bin/cc && \
+    ln -sf /usr/bin/g++-5 /usr/local/bin/cxx && \
     ln -sf /usr/bin/gcc-5 /usr/local/bin/gcc && \
     ln -sf /usr/bin/g++-5 /usr/local/bin/g++
 
