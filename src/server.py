@@ -28,7 +28,7 @@ class PullRequestHandler(tornado.web.RequestHandler):
 
         clone_dest = tempfile.mkdtemp()
         try:
-            clone_url = head['clone_url']
+            clone_url = head['repo']['clone_url']
             clone_branch = head['ref']
             clone_command = [
                 '/usr/bin/git', 'clone', '--progress', '-b', clone_branch, '--depth', '1', clone_url, 'repo'
