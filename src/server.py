@@ -40,7 +40,7 @@ class PullRequestHandler(tornado.web.RequestHandler):
             clone_url = head['repo']['clone_url']
             clone_branch = head['ref']
             clone_command = [
-                '/usr/bin/git', 'clone', '--progress', '-b', clone_branch, '--depth', '1', clone_url, 'repo'
+                'git', 'clone', '--progress', '-b', clone_branch, '--depth', '1', clone_url, 'repo'
             ]
             clone_ret = 1
             clone_count = 3
@@ -54,7 +54,7 @@ class PullRequestHandler(tornado.web.RequestHandler):
             logging.info('Clone OK')
 
             repo_dir = os.path.join(clone_dest, 'repo')
-            build_command = ['/usr/bin/make', 'all']
+            build_command = ['make', 'all']
             build_process = tornado.process.Subprocess(build_command, cwd=repo_dir, stdin=subprocess.DEVNULL)
             build_ret = yield build_process.wait_for_exit()
             if build_ret:
@@ -64,7 +64,7 @@ class PullRequestHandler(tornado.web.RequestHandler):
 
             input_file = os.path.join(repo_dir, 'stdin.txt')
             output_file = os.path.join(repo_dir, 'stdout.txt')
-            run_command = ['/usr/bin/make', 'run']
+            run_command = ['make', '-s', 'run']
             with open(input_file, 'rb') as fin:
                 run_process = tornado.process.Subprocess(run_command, cwd=repo_dir, stdin=fin, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             run_ret = yield run_process.wait_for_exit()
