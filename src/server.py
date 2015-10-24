@@ -63,6 +63,7 @@ class PullRequestHandler(tornado.web.RequestHandler):
     @tornado.gen.coroutine
     def report(self, payload):
         sys.stderr.write(json.dumps(payload))
+        sys.stderr.write('\n')
 
 
 application = tornado.web.Application([
