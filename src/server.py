@@ -112,12 +112,7 @@ class QueryAllHandler(tornado.web.RequestHandler):
         cursor = self.application.db.con.cursor()
         cursor.execute('SELECT id, user, url, iserror, error, stdout, stderr FROM records;')
         result = cursor.fetchall()
-        self.finish({'d': [{'id': c_id, 'user': c_user, 'url': c_url, 'iserror': bool(c_iserror), 'error': c_error, 'stdout': c_stdout, 'stderr': c_stderr} for c_id, c_user, c_url, c_iserror, c_error, c_stdout, c_stderr in result]})
-
-
-class QueryMetadataHandler(tornado.web.RequestHandler):
-    def get(self):
-        self.finish({'title': 'C 语言第二课作业：两个数的加法及 if 语句的使用', 'user_total': len(GITHUB_USER_MAP)})
+        self.finish({'meta': {'title': 'C 语言第二课作业：两个数的加法及 if 语句的使用', 'user_total': len(GITHUB_USER_MAP)}, 'd': [{'id': c_id, 'user': c_user, 'url': c_url, 'iserror': bool(c_iserror), 'error': c_error, 'stdout': c_stdout, 'stderr': c_stderr} for c_id, c_user, c_url, c_iserror, c_error, c_stdout, c_stderr in result]})
 
 
 class DBMan:
@@ -136,7 +131,6 @@ class DBMan:
 
 application = tornado.web.Application([
     (r"/pr", PullRequestHandler),
-    (r"/query/meta", QueryMetadataHandler),
     (r'/query/all', QueryAllHandler)
 ])
 
