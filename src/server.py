@@ -34,7 +34,7 @@ class PullRequestHandler(tornado.web.RequestHandler):
 
         user = payload['pull_request']['user']['login']
         head = payload['pull_request']['head']
-        url = head['html_url'] + '/tree/' + head['sha']
+        url = head['repo']['html_url'] + '/tree/' + head['sha']
 
         clone_dest = tempfile.mkdtemp()
         try:
