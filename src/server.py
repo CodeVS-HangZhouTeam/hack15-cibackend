@@ -23,6 +23,11 @@ GITHUB_USER_MAP = {
 
 
 class PullRequestHandler(tornado.web.RequestHandler):
+    def get(self):
+        self.set_status(404)
+        self.finish('404: Not Found')
+
+
     @tornado.gen.coroutine
     def post(self):
         self.set_status(204)
@@ -101,6 +106,14 @@ class PullRequestHandler(tornado.web.RequestHandler):
         )
 
 
+class QueryAllHandler(tornado.web.RequestHandler):
+    def get(self):
+        cursor = self.application.db.con.cursor()
+        cursor.execute('SELECT id, user, url, iserror, error, stdout, stderr FROM records;')
+        result = cursor.fetchall()
+        self.finish({'d': [{'id': c_id, 'user': c_user, 'url': c_url, 'iserror': c_iserror, 'error': c_error, 'stdout': c_stdout, 'stderr': c_stderr} for c_id, c_user, c_url, c_iserror, c_error, c_stdout, c_stderr in result]})
+
+
 class DBMan:
     def __init__(self):
         self.con = sqlite3.connect(':memory:')
@@ -112,6 +125,7 @@ class DBMan:
 
 application = tornado.web.Application([
     (r"/pr", PullRequestHandler),
+    (r'/query/all', QueryAllHandler)
 ])
 
 
