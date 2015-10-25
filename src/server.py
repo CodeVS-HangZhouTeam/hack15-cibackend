@@ -92,7 +92,7 @@ class PullRequestHandler(tornado.web.RequestHandler):
         self.application.db.con.execute(
             'INSERT INTO records (user, url, iserror, error, stdout, stderr) VALUES (?, ?, ?, ?, ?);', (
                 GITHUB_USER_MAP.get(user, user),
-                url,\
+                url,
                 error is not None,
                 error or '',
                 stdout.decode('utf-8', 'replace'),
