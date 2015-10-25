@@ -116,7 +116,7 @@ class QueryAllHandler(tornado.web.RequestHandler):
         result = cursor.fetchall()
         self.finish({
             'meta': {'title': 'C 语言第二课作业：两个数的加法及 if 语句的使用', 'user_num': len(GITHUB_USER_MAP), 'users': {v: 'https://github.com/'+k for k, v in GITHUB_USER_MAP.items()}},
-            'd': reversed([{'id': c_id, 'user': c_user, 'url': c_url, 'iserror': bool(c_iserror), 'error': c_error, 'stdout': c_stdout, 'stderr': c_stderr} for c_id, c_user, c_url, c_iserror, c_error, c_stdout, c_stderr in result])
+            'd': list(reversed([{'id': c_id, 'user': c_user, 'url': c_url, 'iserror': bool(c_iserror), 'error': c_error, 'stdout': c_stdout, 'stderr': c_stderr} for c_id, c_user, c_url, c_iserror, c_error, c_stdout, c_stderr in result]))
         })
 
 
