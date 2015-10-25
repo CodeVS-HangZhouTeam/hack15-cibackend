@@ -3,6 +3,7 @@
 import json
 import logging
 import os
+import random
 import shutil
 import sqlite3
 import subprocess
@@ -123,7 +124,7 @@ class DBMan:
     def __init__(self):
         self.con = sqlite3.connect(':memory:')
         self.con.execute('CREATE TABLE records (id INTEGER PRIMARY KEY AUTOINCREMENT, user STRING, url STRING, iserror BOOL, error STRING, stdout STRING, stderr STRING);')
-        self.con.executemany('INSERT INTO records (user, url, iserror, error, stdout, stderr) VALUES (?, ?, ?, ?, ?, ?);',
+        fake_records = (
             [('Star Brilliant', 'https://github.com/m13253/hack15-coderepo-submit/blob/2e513181bca6afe4873a756e41258780c33acbd3/main.c', True, 'Build error', "cc     main.c   -o main\n<builtin>: recipe for target 'main' failed\n", 'main.c: In function ‘main’:\nmain.c:4:12: error: ‘b’ undeclared (first use in this function)\n     int a; b; /*\n            ^\nmain.c:4:12: note: each undeclared identifier is reported only once for each function it appears in\nmake: *** [main] Error 1\n')]*3 +
             [('Star Brilliant', 'https://github.com/m13253/hack15-coderepo-submit/blob/623da884dce3672dd33d1345570a1026249a19bc/main.c', True, 'Wrong answer', '56 + -42 = 14\n', 'Please input number A: Please input number B: ')]*5 +
             [('Star Brilliant', 'https://github.com/m13253/hack15-coderepo-submit/blob/63352cd181d593af66143dd46649ceb303ee53e3/main.c', False, '', '56 + (-42) = 14\n', 'Please input number A: Please input number B: ')]*2 +
@@ -134,6 +135,8 @@ class DBMan:
             [('Luv Letter', 'https://github.com/m13253/hack15-coderepo-submit/blob/623da884dce3672dd33d1345570a1026249a19bc/main.c', True, 'Wrong answer', '56 + -42 = 14\n', 'Please input number A: Please input number B: ')]*9 +
             [('Luv Letter', 'https://github.com/m13253/hack15-coderepo-submit/blob/63352cd181d593af66143dd46649ceb303ee53e3/main.c', False, '', '56 + (-42) = 14\n', 'Please input number A: Please input number B: ')]
         )
+        random.shuffle(fake_records)
+        self.con.executemany('INSERT INTO records (user, url, iserror, error, stdout, stderr) VALUES (?, ?, ?, ?, ?, ?);', fake_records)
 
     def __del__(self):
         self.con.close()
