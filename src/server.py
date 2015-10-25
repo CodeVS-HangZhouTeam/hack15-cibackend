@@ -100,7 +100,7 @@ class PullRequestHandler(tornado.web.RequestHandler):
             stdout.decode('utf-8', 'replace'),
             stdout.decode('utf-8', 'replace')
         )
-        self.application.db.con.execute('INSERT INTO records (user, url, iserror, error, stdout, stderr) VALUES (?, ?, ?, ?, ?);', args)
+        self.application.db.con.execute('INSERT INTO records (user, url, iserror, error, stdout, stderr) VALUES (? ?, ?, ?, ?, ?);', args)
         logging.info(repr(args))
 
 
