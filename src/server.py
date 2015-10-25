@@ -55,8 +55,7 @@ class PullRequestHandler(tornado.web.RequestHandler):
                     clone_ret = yield clone_process.wait_for_exit()
                 except subprocess.CalledProcessError:
                     if clone_count == 1:
-                        clone_stdout = clone_process.stdout.read()
-                        clone_stderr = clone_process.stderr.read()
+                        clone_stdout, clone_stderr = clone_process.communicate()
                         return (yield self.report(user, url, 'Unable to download source code', clone_stdout, clone_stderr))
                 except:
                     break
@@ -69,8 +68,7 @@ class PullRequestHandler(tornado.web.RequestHandler):
             try:
                 build_ret = yield build_process.wait_for_exit()
             except subprocess.CalledProcessError:
-                build_stdout = build_process.stdout.read()
-                build_stderr = build_process.stderr.read()
+                build_stdout, build_stderr = build_process.communicate()
                 return (yield self.report(user, url, 'Build error', build_stdout, build_stderr))
 
             logging.info('Build OK')
@@ -83,8 +81,7 @@ class PullRequestHandler(tornado.web.RequestHandler):
             try:
                 run_ret = yield run_process.wait_for_exit()
             except subprocess.CalledProcessError:
-                run_stdout = run_process.stdout.read()
-                run_stderr = run_process.stderr.read()
+                run_stdout, run_stderr = run_process.communicate()
                 return (yield self.report(user, url, 'Program exited abnormally', run_stdout, run_stderr))
             else:
                 logging.info('Run OK')
