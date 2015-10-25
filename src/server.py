@@ -34,6 +34,7 @@ class PullRequestHandler(tornado.web.RequestHandler):
 
         user = payload['pull_request']['user']['login']
         head = payload['pull_request']['head']
+        url = head['html_url'] + '/tree/' + head['sha']
 
         clone_dest = tempfile.mkdtemp()
         try:
@@ -51,7 +52,7 @@ class PullRequestHandler(tornado.web.RequestHandler):
             if clone_ret:
                 clone_stdout = clone_process.stdout.read()
                 clone_stderr = clone_process.stderr.read()
-                return (yield self.report({'user': user, 'error': 'Unable to download source code', 'stdout': clone_stdout, 'stderr': clone_stderr}))
+                return (yield self.report(user, url, 'Unable to download source code', clone_stdout, clone_stderr))
 
             logging.info('Clone OK')
 
@@ -62,7 +63,7 @@ class PullRequestHandler(tornado.web.RequestHandler):
             if build_ret:
                 build_stdout = build_process.stdout.read()
                 build_stderr = build_process.stderr.read()
-                return (yield self.report({'user': user, 'error': 'Build error', 'stdout': build_stdout, 'stderr': build_stderr}))
+                return (yield self.report(user, url, 'Build error', build_stdout, build_stderr))
 
             logging.info('Build OK')
 
@@ -76,25 +77,34 @@ class PullRequestHandler(tornado.web.RequestHandler):
             run_stderr = run_process.stderr.read()
             logging.info('Run OK')
             if run_ret:
-                return (yield self.report({'user': user, 'error': 'Program exited abnormally', 'stdout': run_stdout, 'stderr': run_stderr}))
+                return (yield self.report(user, url, 'Program exited abnormally', run_stdout, run_stderr))
             else:
                 with open(output_file, 'rb') as fout:
                     result_correct = run_stdout == fout.read() 
-                return (yield self.report({'user': user, 'error': None if result_correct else 'Wrong answer', 'stdout': run_stdout, 'stderr': run_stderr}))
+                return (yield self.report(user, url, None if result_correct else 'Wrong answer', run_stdout, run_stderr))
         finally:
             shutil.rmtree(clone_dest, True)
 
     @tornado.gen.coroutine
-    def report(self, payload):
+    def report(self, user, url, error, stdout, stderr):
         sys.stderr.write(repr(payload))
         sys.stderr.write('\n')
-        self.application.db.con.execute('INSERT INTO records (user, iserror, error, stdout, stderr) VALUES (?, ?, ?, ?, ?);', (GITHUB_USER_MAP.get(payload['user'], payload['user']), payload['error'] is not None, payload['error'] or '', payload['stdout'].decode('utf-8', 'replace'), payload['stderr'].decode('utf-8', 'replace')))
+        self.application.db.con.execute(
+            'INSERT INTO records (user, url, iserror, error, stdout, stderr) VALUES (?, ?, ?, ?, ?);', (
+                GITHUB_USER_MAP.get(user, user),
+                url,\
+                error is not None,
+                error or '',
+                stdout.decode('utf-8', 'replace'),
+                stdout.decode('utf-8', 'replace')
+            )
+        )
 
 
 class DBMan:
     def __init__(self):
         self.con = sqlite3.connect(':memory:')
-        self.con.execute('CREATE TABLE records (id INTEGER PRIMARY KEY AUTOINCREMENT, user STRING, iserror BOOL, error STRING, stdout STRING, stderr STRING);')
+        self.con.execute('CREATE TABLE records (id INTEGER PRIMARY KEY AUTOINCREMENT, user STRING, url STRING, iserror BOOL, error STRING, stdout STRING, stderr STRING);')
 
     def __del__(self):
         self.con.close()
