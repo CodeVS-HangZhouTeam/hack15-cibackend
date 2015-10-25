@@ -109,7 +109,7 @@ class QueryAllHandler(tornado.web.RequestHandler):
         cursor = self.application.db.con.cursor()
         cursor.execute('SELECT id, user, url, iserror, error, stdout, stderr FROM records;')
         result = cursor.fetchall()
-        self.finish({'d': [{'id': c_id, 'user': c_user, 'url': c_url, 'iserror': c_iserror, 'error': c_error, 'stdout': c_stdout, 'stderr': c_stderr} for c_id, c_user, c_url, c_iserror, c_error, c_stdout, c_stderr in result]})
+        self.finish({'d': [{'id': c_id, 'user': c_user, 'url': c_url, 'iserror': bool(c_iserror), 'error': c_error, 'stdout': c_stdout, 'stderr': c_stderr} for c_id, c_user, c_url, c_iserror, c_error, c_stdout, c_stderr in result]})
 
 
 class DBMan:
