@@ -92,18 +92,16 @@ class PullRequestHandler(tornado.web.RequestHandler):
 
     @tornado.gen.coroutine
     def report(self, user, url, error, stdout, stderr):
-        sys.stderr.write(repr(payload))
-        sys.stderr.write('\n')
-        self.application.db.con.execute(
-            'INSERT INTO records (user, url, iserror, error, stdout, stderr) VALUES (?, ?, ?, ?, ?);', (
-                GITHUB_USER_MAP.get(user, user),
-                url,
-                error is not None,
-                error or '',
-                stdout.decode('utf-8', 'replace'),
-                stdout.decode('utf-8', 'replace')
-            )
+        args = (
+            GITHUB_USER_MAP.get(user, user),
+            url,
+            error is not None,
+            error or '',
+            stdout.decode('utf-8', 'replace'),
+            stdout.decode('utf-8', 'replace')
         )
+        self.application.db.con.execute('INSERT INTO records (user, url, iserror, error, stdout, stderr) VALUES (?, ?, ?, ?, ?);', args)
+        logging.info(repr(args))
 
 
 class QueryAllHandler(tornado.web.RequestHandler):
