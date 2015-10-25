@@ -59,7 +59,7 @@ class PullRequestHandler(tornado.web.RequestHandler):
                     if clone_count == 1:
                         clone_stdout = clone_process.stdout.read()
                         clone_stderr = clone_process.stderr.read()
-                        return (yield self.report(user, url, '无法下载源代码。', clone_stdout, clone_stderr))
+                        return (yield self.report(user, url, '无法下载源代码', clone_stdout, clone_stderr))
                 else:
                     break
 
@@ -72,7 +72,7 @@ class PullRequestHandler(tornado.web.RequestHandler):
             if build_ret:
                 build_stdout = build_process.stdout.read()
                 build_stderr = build_process.stderr.read()
-                return (yield self.report(user, url, '程序构建失败。', build_stdout, build_stderr))
+                return (yield self.report(user, url, '程序构建失败', build_stdout, build_stderr))
 
             logging.info('Build OK')
 
@@ -86,11 +86,11 @@ class PullRequestHandler(tornado.web.RequestHandler):
             run_stdout = run_process.stdout.read()
             run_stderr = run_process.stderr.read()
             if run_ret:
-                return (yield self.report(user, url, '程序异常退出。', run_stdout, run_stderr))
+                return (yield self.report(user, url, '程序异常退出', run_stdout, run_stderr))
             else:
                 with open(output_file, 'rb') as fout:
                     result_correct = run_stdout == fout.read() 
-                return (yield self.report(user, url, None if result_correct else '程序输出不符。', run_stdout, run_stderr))
+                return (yield self.report(user, url, None if result_correct else '程序输出不符', run_stdout, run_stderr))
         finally:
             shutil.rmtree(clone_dest, True)
 
@@ -125,16 +125,16 @@ class DBMan:
         self.con = sqlite3.connect(':memory:')
         self.con.execute('CREATE TABLE records (id INTEGER PRIMARY KEY AUTOINCREMENT, user STRING, url STRING, iserror BOOL, error STRING, stdout STRING, stderr STRING);')
         fake_records = (
-            [('Star Brilliant', 'https://github.com/m13253/hack15-coderepo-submit/blob/2e513181bca6afe4873a756e41258780c33acbd3/main.c', True, '程序构建失败。', "cc     main.c   -o main\n<builtin>: recipe for target 'main' failed\n", 'main.c: In function ‘main’:\nmain.c:4:12: error: ‘b’ undeclared (first use in this function)\n     int a; b; /*\n            ^\nmain.c:4:12: note: each undeclared identifier is reported only once for each function it appears in\nmake: *** [main] Error 1\n')]*3 +
-            [('Star Brilliant', 'https://github.com/m13253/hack15-coderepo-submit/blob/623da884dce3672dd33d1345570a1026249a19bc/main.c', True, '程序输出不符。', '56 + -42 = 14\n', 'Please input number A: \nPlease input number B: ')]*5 +
+            [('Star Brilliant', 'https://github.com/m13253/hack15-coderepo-submit/blob/2e513181bca6afe4873a756e41258780c33acbd3/main.c', True, '程序构建失败', "cc     main.c   -o main\n<builtin>: recipe for target 'main' failed\n", 'main.c: In function ‘main’:\nmain.c:4:12: error: ‘b’ undeclared (first use in this function)\n     int a; b; /*\n            ^\nmain.c:4:12: note: each undeclared identifier is reported only once for each function it appears in\nmake: *** [main] Error 1\n')]*3 +
+            [('Star Brilliant', 'https://github.com/m13253/hack15-coderepo-submit/blob/623da884dce3672dd33d1345570a1026249a19bc/main.c', True, '程序输出不符', '56 + -42 = 14\n', 'Please input number A: \nPlease input number B: ')]*5 +
             [('Star Brilliant', 'https://github.com/m13253/hack15-coderepo-submit/blob/63352cd181d593af66143dd46649ceb303ee53e3/main.c', False, '', '56 + (-42) = 14\n', 'Please input number A: \nPlease input number B: ')]*2 +
-            [('James Swineson', 'https://github.com/m13253/hack15-coderepo-submit/blob/2e513181bca6afe4873a756e41258780c33acbd3/main.c', True, '程序构建失败。', "cc     main.c   -o main\n<builtin>: recipe for target 'main' failed\n", 'main.c: In function ‘main’:\nmain.c:4:12: error: ‘b’ undeclared (first use in this function)\n     int a; b; /*\n            ^\nmain.c:4:12: note: each undeclared identifier is reported only once for each function it appears in\nmake: *** [main] Error 1\n')]*4 +
-            [('James Swineson', 'https://github.com/m13253/hack15-coderepo-submit/blob/623da884dce3672dd33d1345570a1026249a19bc/main.c', True, '程序输出不符。', '56 + -42 = 14\n', 'Please input number A: \nPlease input number B: ')]*7 +
+            [('James Swineson', 'https://github.com/m13253/hack15-coderepo-submit/blob/2e513181bca6afe4873a756e41258780c33acbd3/main.c', True, '程序构建失败', "cc     main.c   -o main\n<builtin>: recipe for target 'main' failed\n", 'main.c: In function ‘main’:\nmain.c:4:12: error: ‘b’ undeclared (first use in this function)\n     int a; b; /*\n            ^\nmain.c:4:12: note: each undeclared identifier is reported only once for each function it appears in\nmake: *** [main] Error 1\n')]*4 +
+            [('James Swineson', 'https://github.com/m13253/hack15-coderepo-submit/blob/623da884dce3672dd33d1345570a1026249a19bc/main.c', True, '程序输出不符', '56 + -42 = 14\n', 'Please input number A: \nPlease input number B: ')]*7 +
             [('James Swineson', 'https://github.com/m13253/hack15-coderepo-submit/blob/63352cd181d593af66143dd46649ceb303ee53e3/main.c', False, '', '56 + (-42) = 14\n', 'Please input number A: \nPlease input number B: ')] +
-            [('Luv Letter', 'https://github.com/m13253/hack15-coderepo-submit/blob/2e513181bca6afe4873a756e41258780c33acbd3/main.c', True, '程序构建失败。', "cc     main.c   -o main\n<builtin>: recipe for target 'main' failed\n", 'main.c: In function ‘main’:\nmain.c:4:12: error: ‘b’ undeclared (first use in this function)\n     int a; b; /*\n            ^\nmain.c:4:12: note: each undeclared identifier is reported only once for each function it appears in\nmake: *** [main] Error 1\n')]*5 +
-            [('Luv Letter', 'https://github.com/m13253/hack15-coderepo-submit/blob/623da884dce3672dd33d1345570a1026249a19bc/main.c', True, '程序输出不符。', '56 + -42 = 14\n', 'Please input number A: \nPlease input number B: ')]*9 +
+            [('Luv Letter', 'https://github.com/m13253/hack15-coderepo-submit/blob/2e513181bca6afe4873a756e41258780c33acbd3/main.c', True, '程序构建失败', "cc     main.c   -o main\n<builtin>: recipe for target 'main' failed\n", 'main.c: In function ‘main’:\nmain.c:4:12: error: ‘b’ undeclared (first use in this function)\n     int a; b; /*\n            ^\nmain.c:4:12: note: each undeclared identifier is reported only once for each function it appears in\nmake: *** [main] Error 1\n')]*5 +
+            [('Luv Letter', 'https://github.com/m13253/hack15-coderepo-submit/blob/623da884dce3672dd33d1345570a1026249a19bc/main.c', True, '程序输出不符', '56 + -42 = 14\n', 'Please input number A: \nPlease input number B: ')]*9 +
             [('Luv Letter', 'https://github.com/m13253/hack15-coderepo-submit/blob/63352cd181d593af66143dd46649ceb303ee53e3/main.c', False, '', '56 + (-42) = 14\n', 'Please input number A: \nPlease input number B: ')] +
-            [('Luv Letter', 'https://github.com/m13253/hack15-coderepo-submit/blob/63352cd181d593af66143dd46649ceb303ee53e3/main.c', True, '程序异常退出。', '56 + (-42) = 14\n', 'Please input number A: \nPlease input number B: ')]
+            [('Luv Letter', 'https://github.com/m13253/hack15-coderepo-submit/blob/63352cd181d593af66143dd46649ceb303ee53e3/main.c', True, '程序异常退出', '56 + (-42) = 14\n', 'Please input number A: \nPlease input number B: ')]
         )
         random.shuffle(fake_records)
         self.con.executemany('INSERT INTO records (user, url, iserror, error, stdout, stderr) VALUES (?, ?, ?, ?, ?, ?);', fake_records)
