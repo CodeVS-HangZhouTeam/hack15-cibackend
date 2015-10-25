@@ -123,11 +123,17 @@ class DBMan:
     def __init__(self):
         self.con = sqlite3.connect(':memory:')
         self.con.execute('CREATE TABLE records (id INTEGER PRIMARY KEY AUTOINCREMENT, user STRING, url STRING, iserror BOOL, error STRING, stdout STRING, stderr STRING);')
-        self.con.executemany('INSERT INTO records (user, url, iserror, error, stdout, stderr) VALUES (?, ?, ?, ?, ?, ?);', [
-            ('Star Brilliant', 'https://github.com/m13253/hack15-coderepo-submit/tree/63352cd181d593af66143dd46649ceb303ee53e3', False, '', '56 + (-42) = 14\n', 'Please input number A: Please input number B: '),
-            ('Star Brilliant', 'https://github.com/m13253/hack15-coderepo-submit/tree/2e513181bca6afe4873a756e41258780c33acbd3', True, 'Build error', "cc     main.c   -o main\n<builtin>: recipe for target 'main' failed\n", "main.c: In function 'main':\nmain.c:4:12: error: 'b' undeclared (first use in this function)\n     int a; b; /*\n            ^\nmain.c:4:12: note: each undeclared identifier is reported only once for each function it appears in\nmake: *** [main] Error 1\n"),
-            ('Star Brilliant', 'https://github.com/m13253/hack15-coderepo-submit/tree/623da884dce3672dd33d1345570a1026249a19bc', True, 'Wrong answer', '56 + -42 = 14\n', 'Please input number A: Please input number B: ')
-        ])
+        self.con.executemany('INSERT INTO records (user, url, iserror, error, stdout, stderr) VALUES (?, ?, ?, ?, ?, ?);',
+            [('Star Brilliant', 'https://github.com/m13253/hack15-coderepo-submit/tree/2e513181bca6afe4873a756e41258780c33acbd3', True, 'Build error', "cc     main.c   -o main\n<builtin>: recipe for target 'main' failed\n", 'main.c: In function ‘main’:\nmain.c:4:12: error: ‘b’ undeclared (first use in this function)\n     int a; b; /*\n            ^\nmain.c:4:12: note: each undeclared identifier is reported only once for each function it appears in\nmake: *** [main] Error 1\n')]*3 +
+            [('Star Brilliant', 'https://github.com/m13253/hack15-coderepo-submit/tree/623da884dce3672dd33d1345570a1026249a19bc', True, 'Wrong answer', '56 + -42 = 14\n', 'Please input number A: Please input number B: ')]*5 +
+            [('Star Brilliant', 'https://github.com/m13253/hack15-coderepo-submit/tree/63352cd181d593af66143dd46649ceb303ee53e3', False, '', '56 + (-42) = 14\n', 'Please input number A: Please input number B: ')]*2 +
+            [('James Swineson', 'https://github.com/m13253/hack15-coderepo-submit/tree/2e513181bca6afe4873a756e41258780c33acbd3', True, 'Build error', "cc     main.c   -o main\n<builtin>: recipe for target 'main' failed\n", 'main.c: In function ‘main’:\nmain.c:4:12: error: ‘b’ undeclared (first use in this function)\n     int a; b; /*\n            ^\nmain.c:4:12: note: each undeclared identifier is reported only once for each function it appears in\nmake: *** [main] Error 1\n')]*4 +
+            [('James Swineson', 'https://github.com/m13253/hack15-coderepo-submit/tree/623da884dce3672dd33d1345570a1026249a19bc', True, 'Wrong answer', '56 + -42 = 14\n', 'Please input number A: Please input number B: ')]*7 +
+            [('James Swineson', 'https://github.com/m13253/hack15-coderepo-submit/tree/63352cd181d593af66143dd46649ceb303ee53e3', False, '', '56 + (-42) = 14\n', 'Please input number A: Please input number B: ')] +
+            [('Luv Letter', 'https://github.com/m13253/hack15-coderepo-submit/tree/2e513181bca6afe4873a756e41258780c33acbd3', True, 'Build error', "cc     main.c   -o main\n<builtin>: recipe for target 'main' failed\n", 'main.c: In function ‘main’:\nmain.c:4:12: error: ‘b’ undeclared (first use in this function)\n     int a; b; /*\n            ^\nmain.c:4:12: note: each undeclared identifier is reported only once for each function it appears in\nmake: *** [main] Error 1\n')]*5 +
+            [('Luv Letter', 'https://github.com/m13253/hack15-coderepo-submit/tree/623da884dce3672dd33d1345570a1026249a19bc', True, 'Wrong answer', '56 + -42 = 14\n', 'Please input number A: Please input number B: ')]*9 +
+            [('Luv Letter', 'https://github.com/m13253/hack15-coderepo-submit/tree/63352cd181d593af66143dd46649ceb303ee53e3', False, '', '56 + (-42) = 14\n', 'Please input number A: Please input number B: ')]
+        )
 
     def __del__(self):
         self.con.close()
