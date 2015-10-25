@@ -109,6 +109,7 @@ class PullRequestHandler(tornado.web.RequestHandler):
 
 class QueryAllHandler(tornado.web.RequestHandler):
     def get(self):
+        self.add_header('Access-Control-Allow-Origin', '*')
         cursor = self.application.db.con.cursor()
         cursor.execute('SELECT id, user, url, iserror, error, stdout, stderr FROM records;')
         result = cursor.fetchall()
