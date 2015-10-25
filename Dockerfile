@@ -18,8 +18,8 @@ ADD src /home/user/cibackend
 USER user
 EXPOSE 8080
 WORKDIR /home/user/
-ENV LC_ALL=zh_CN.UTF-8
-ENV LANG=zh_CN.UTF-8
+ENV LANG zh_CN.UTF-8
+ENV LC_ALL zh_CN.UTF-8
 
 ENTRYPOINT /home/user/cibackend/server.py
 
