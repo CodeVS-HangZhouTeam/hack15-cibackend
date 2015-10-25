@@ -98,7 +98,7 @@ class PullRequestHandler(tornado.web.RequestHandler):
             error is not None,
             error or '',
             stdout.decode('utf-8', 'replace'),
-            stdout.decode('utf-8', 'replace')
+            stderr.decode('utf-8', 'replace')
         )
         self.application.db.con.execute('INSERT INTO records (user, url, iserror, error, stdout, stderr) VALUES (?, ?, ?, ?, ?, ?);', args)
         logging.info(repr(args))
