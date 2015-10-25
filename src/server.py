@@ -51,13 +51,13 @@ class PullRequestHandler(tornado.web.RequestHandler):
             clone_count = 3
             for clone_count in range(4, 0, -1):
                 clone_process = tornado.process.Subprocess(clone_command, cwd=clone_dest, stdin=subprocess.DEVNULL)
-                try:
-                    clone_ret = yield clone_process.wait_for_exit()
-                except subprocess.CalledProcessError:
+                clone_ret = yield clone_process.wait_for_exit(False)
+                if clone_ret:
                     if clone_count == 1:
-                        clone_stdout, clone_stderr = clone_process.communicate()
+                        clone_stdout = clone_process.stdout.read()
+                        clone_stderr = clone_process.stderr.read()
                         return (yield self.report(user, url, 'Unable to download source code', clone_stdout, clone_stderr))
-                except:
+                else:
                     break
 
             logging.info('Clone OK')
@@ -65,10 +65,10 @@ class PullRequestHandler(tornado.web.RequestHandler):
             repo_dir = os.path.join(clone_dest, 'repo')
             build_command = ['make', 'all']
             build_process = tornado.process.Subprocess(build_command, cwd=repo_dir, stdin=subprocess.DEVNULL)
-            try:
-                build_ret = yield build_process.wait_for_exit()
-            except subprocess.CalledProcessError:
-                build_stdout, build_stderr = build_process.communicate()
+            build_ret = yield build_process.wait_for_exit(False)
+            if build_ret:
+                build_stdout = build_process.stdout.read()
+                build_stderr = build_process.stderr.read()
                 return (yield self.report(user, url, 'Build error', build_stdout, build_stderr))
 
             logging.info('Build OK')
@@ -78,15 +78,13 @@ class PullRequestHandler(tornado.web.RequestHandler):
             run_command = ['make', '-s', 'run']
             with open(input_file, 'rb') as fin:
                 run_process = tornado.process.Subprocess(run_command, cwd=repo_dir, stdin=fin, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            try:
-                run_ret = yield run_process.wait_for_exit()
-            except subprocess.CalledProcessError:
-                run_stdout, run_stderr = run_process.communicate()
+            run_ret = yield run_process.wait_for_exit(False)
+            logging.info('Run OK')
+            run_stdout = run_process.stdout.read()
+            run_stderr = run_process.stderr.read()
+            if run_ret:
                 return (yield self.report(user, url, 'Program exited abnormally', run_stdout, run_stderr))
             else:
-                logging.info('Run OK')
-                run_stdout = run_process.stdout.read()
-                run_stderr = run_process.stderr.read()
                 with open(output_file, 'rb') as fout:
                     result_correct = run_stdout == fout.read() 
                 return (yield self.report(user, url, None if result_correct else 'Wrong answer', run_stdout, run_stderr))
